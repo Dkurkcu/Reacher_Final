@@ -1,0 +1,16 @@
+method: grid
+name: pushable_truncation_over_0.02J
+metric:
+  name: success_rate   
+  goal: maximize
+parameters:
+  learning_rate:
+    values: [3e-4]
+  ent_coef:
+    values: [0.02]
+  batch_size:
+    values: [256]
+  clip_range:
+    values: [0.03]
+  seed:
+    values: [0, 7, 11, 31, 42]
