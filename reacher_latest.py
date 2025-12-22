@@ -60,6 +60,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
         self.contact_energy_limit = 0.07 # Hard limit for truncation (Failure Zone)
         self.episode_contact_energy = 0.0
         self._pulse_pending = False # NEW: Flag to trigger the corrective pulse
+        self._pulse_steps_left = 0 # NEW: Counter for sustained pulse
         
         self._prev_contact_energy = 0.0 # Previous step's accumulated contact energy
         self._was_in_caution_zone = False # Tracks if the agent exceeded 0.02J during contact
@@ -222,10 +223,10 @@ class ReacherV3Env(MujocoEnv, EzPickle):
             return self.get_obs(), reward, terminated, truncated, info
 
         # ------------------- CORRECTIVE PULSE OVERRIDE -------------------
-        if self._pulse_pending:
-            # Override the agent's action with maximum negative torque for one step
-            action = np.array([-3.0, -3.0], dtype=np.float64) 
-            self._pulse_pending = False # Clear the flag immediately
+        if self._pulse_steps_left > 0:
+            # Override agent's action with sustained negative torque
+            action = np.array([-3.0, -2.0], dtype=np.float64) 
+            self._pulse_steps_left -= 1 # Decrement the counter
         # -----------------------------------------------------------------
 
         # Step simulation (applies the original action or the corrective pulse)
@@ -267,10 +268,13 @@ class ReacherV3Env(MujocoEnv, EzPickle):
             self._was_in_caution_zone = True # Set flag for persistent reward/reset
             
             # TRIGGER THE CORRECTIVE PULSE FOR THE NEXT STEP
-            self._pulse_pending = True 
+            self._pulse_steps_left = 10
+
+        if not is_contact and self.episode_contact_energy > 1e-6:
+            self.episode_contact_energy = 0.0
+            self._prev_contact_energy = 0.0
+        
             
-            # Initiate a short exploration window
-            self._disengage_steps_left = 5 
         # ------------------------------------------------------------------
 
         # Mechanical work increment
@@ -303,7 +307,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
                 
                 # APPLY HEAVY PENALTY ONLY IF CURRENT ENERGY IS ABOVE 0.02 J
                 if self.episode_contact_energy > self.contact_warning_limit:
-                    contact_shaping_reward = -20.0 * delta_contact_energy  # Pushing Penalty
+                    contact_shaping_reward = -75.0 * delta_contact_energy  # Pushing Penalty
             
             # Check if the energy is DECREASING (Retreating/Disengaging)
             elif delta_contact_energy < 0:
@@ -311,7 +315,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
                 # APPLY PERSISTENT REWARD IF THE CAUTION FLAG IS SET (meaning it has breached 0.02 J)
                 if self._was_in_caution_zone:
                     # MAXIMIZED Retreat Reward
-                    contact_shaping_reward = -300.0 * delta_contact_energy 
+                    contact_shaping_reward = -150.0 * delta_contact_energy 
         
         # 3. Update history for the next step's calculation
         self._prev_contact_energy = self.episode_contact_energy
@@ -348,6 +352,14 @@ class ReacherV3Env(MujocoEnv, EzPickle):
         if is_contact:
             collision_penalty = 1.0 * box_force_magnitude 
 
+            # Inside step:
+        if dist < 0.1:
+            # Reduce movement costs by 95%
+            vel_penalty *= 0.00
+            act_penalty *= 0.00
+            energy_cost *= 0.00
+            
+
         # Final Reward calculation
         reward = progress - energy_cost - time_penalty - vel_penalty - act_penalty \
                  - collision_penalty + contact_shaping_reward
@@ -358,7 +370,9 @@ class ReacherV3Env(MujocoEnv, EzPickle):
             reward += 10.0
             if dist < 0.02:
                 reward += 5.0
-            
+                
+                
+        
             # REWARD FOR SAFE SUCCESS: Bonus for success without entering caution zone (0.02J)
             if self.episode_contact_energy < self.contact_warning_limit: 
                 reward += 5.0 
@@ -374,7 +388,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
             if self._was_in_caution_zone:
                 # SUCCESSFUL RETREAT: Reset progress and start exploration window
                 self.prev_dist = dist# Reset progress state
-                self._disengage_steps_left = 5 # Start the exploration window (5 steps)
+                self._disengage_steps_left = 40  # Start the exploration window (5 steps)
             
             # Reset the caution flag ONLY when energy hits zero, clearing the state for the next collision
             self._was_in_caution_zone = False 

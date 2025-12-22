@@ -7,7 +7,7 @@ parameters:
   learning_rate:
     values: [3e-4]
   ent_coef:
-    values: [0.02]
+    values: [0.03]
   batch_size:
     values: [256]
   clip_range:

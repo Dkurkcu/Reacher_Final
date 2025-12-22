@@ -7,16 +7,21 @@ from reacher_latest import ReacherV3Env # your env module/class
 from stable_baselines3 import PPO
 from stable_baselines3.common.vec_env import DummyVecEnv
 from gymnasium.wrappers import TimeLimit
+# ADD THIS IMPORT
+from stable_baselines3.common.vec_env import VecFrameStack
 
 
 MODEL_PATH = "fixed_arm_directsweep.zip" # adjust if needed
 XML_NAME = "reacher_v3.xml"# adjust if needed
+# DEFINE THE STACK SIZE (MUST MATCH TRAINING)
+N_STACK = 4 
 
 
 def make_env():
     def _init():
         env = ReacherV3Env(XML_NAME, render_mode="human") 
-        env = TimeLimit(env, max_episode_steps=800)
+        # Updated max episode steps to 800
+        env = TimeLimit(env, max_episode_steps=400) 
         return env
     return _init
 
@@ -30,9 +35,14 @@ def unwrap_env(venv):
 
 
 def main():
-    # Build single-env VecEnv with human render
-    venv = DummyVecEnv([make_env()])
-    base_env = unwrap_env(venv)
+    # Build base single-env VecEnv
+    venv_base = DummyVecEnv([make_env()])
+    
+    # NEW: Apply FrameStack wrapper to match the trained model's input dimension (11 * 4 = 44)
+    venv = VecFrameStack(venv_base, n_stack=N_STACK) 
+    
+    # Unwrap the base environment (the inner ReacherV3Env) to read custom attributes
+    base_env = unwrap_env(venv_base) 
 
     # Optional: quick wiring print (using actual attribute names from ReacherV3Env)
     try:
@@ -49,12 +59,14 @@ def main():
     if not os.path.exists(MODEL_PATH):
         print(f"[Error] Model file not found: {MODEL_PATH}")
         print("Train or place your PPO zip here, or change MODEL_PATH.")
-        venv.close()
+        venv_base.close() # Close venv_base since venv wraps it
         return
-    model = PPO.load(MODEL_PATH, env=venv)
+    
+    # Model loads correctly because venv provides the 44-dim observation
+    model = PPO.load(MODEL_PATH, env=venv) 
 
     # Reset
-    # FIX APPLIED HERE: Only unpack the observation
+    # FIX APPLIED HERE: Only unpack the observation (compatible with older SB3)
     obs = venv.reset() 
 
     for episode in range(200):
@@ -89,20 +101,12 @@ def main():
             reward = float(reward_arr[0])
 
             # 2. Derive modern flags from old 'done' and 'info'
-            # Note: The custom safety check is a TRUNCATION signal.
             safety_trunc = bool(info.get("contact_energy_limit_reached", False))
             time_trunc = bool(info.get("TimeLimit.truncated", False)) 
-            
-            # If done is True, it means either terminated (success) or truncated (time limit/safety) occurred.
-            # We treat everything that isn't safety_trunc as 'terminated' for simplicity in old logic.
-            # The official Gymnasium split is: done = terminated OR truncated
-            # If the episode ended (old_done=True) AND it was due to safety or time limit, it's truncated.
-            # Otherwise, it's terminated (e.g., success or environment specific termination).
             
             truncated = safety_trunc or time_trunc
             terminated = old_done and not truncated 
             
-            # For the loop, we use the original logic (done OR truncated)
             done = terminated or truncated 
 
             ep_reward += reward
@@ -111,10 +115,10 @@ def main():
 
             # --- telemetry pulled from env.info ---
             contact = bool(info.get("contact", False)) 
-            e_push_step  = float(info.get("contact_energy_inc", 0.0))
+            e_push_step= float(info.get("contact_energy_inc", 0.0))
             e_push_ep = float(info.get("episode_contact_energy", 0.0))
             budget= float(info.get("contact_energy_limit", np.nan)) 
-            budget_exceeded = safety_trunc # safety_trunc and budget_exceeded are the same
+            budget_exceeded = safety_trunc 
 
             # Contact state transitions + per-step readout while in contact
             if contact and not in_contact_prev:
@@ -140,7 +144,6 @@ def main():
                 else:
                     print(f"[SAFETY] Contact push-energy EXCEEDED at step {steps}: {e_push_ep:.4f} J")
                 exceeded_announced = True
-                # The episode is now truncated, which will be caught by the while loop condition.
 
             if in_contact_prev and not contact:
                 print(f"[CONTACT-END] step={steps}  E_contact_ep={e_push_ep:.4f} J")
@@ -159,7 +162,7 @@ def main():
             tag = "SAFETY TRUNC."
         elif time_trunc:
             tag = "TIME-LIMIT TRUNC."
-        elif done: # Must be terminated by old logic, but not success
+        elif done: 
             tag = "TERMINATED."
         else:
             tag = "DONE."
@@ -175,6 +178,6 @@ def main():
         obs = venv.reset() 
         time.sleep(0.4)
 
-
+ 
 if __name__ == "__main__":
     main()
