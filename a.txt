@@ -165,3 +165,7 @@ now will increase the duration values for a more explosive pushback but regardin
  maybe include the last n little steps after disengagement as history to avoid the same trajectory
  adding the sequence of the last position after disengagement as history
  maybe try to fix the obs pos
+ make the box not movable
+ lose the in contact energy measurements
+ measure the energy of the last n steps because measuring from the start will be hard and pointless to finding 
+ the contact energy(this is to drop the contact energy measurements because its kind of cheating)
