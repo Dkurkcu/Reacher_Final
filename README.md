@@ -1,7 +1,6 @@
-
 # Energy-Aware Reinforcement Learning for Proprioceptive Stall Detection
 
-Official repository for the Brief Research Report: **"Energy-Aware Reinforcement Learning for Proprioceptive Stall Detection"** 
+Official repository for the Brief Research Report: **"Energy-Aware Reinforcement Learning for Proprioceptive Stall Detection"**.
 
 This repository contains the complete simulation environment, trained policy models, and evaluation scripts required to reproduce the energy metrics and behavioral results presented in the paper. 
 
@@ -13,34 +12,7 @@ This project investigates how incorporating energy awareness into a Reinforcemen
 
 ## Videos
 
-
-<table align="center">
-  <tr>
-    <td align="center"><b>Unobstructed Reaching</b></td>
-    <td align="center"><b>Lightweight Obstacle</b></td>
-    <td align="center"><b>Heavyweight Obstacle (Stall & Recovery)</b></td>
-  </tr>
-  <tr>
-    <td>
-      <video src="media/unobstructed_pullback_algorithm.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-     <td>
-      <video src="media/unobstructed_baseline_algorithm.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-     <td>
-      <video src="media/baseline_light_mass.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-     <td>
-      <video src="media/baseline_heavy_mass.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-    <td>
-      <video src="media/pullback_light_mass.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-    <td>
-      <video src="media/pullback_heavy_mass.mp4" width="100%" controls autoplay loop muted></video>
-    </td>
-  </tr>
-</table>
+The evaluation videos demonstrating unobstructed reaching, pushing a lightweight obstacle, and stall recovery against a heavyweight obstacle can be found in the `media` folder of this repository.
 
 ## Repository Structure
 
@@ -53,6 +25,6 @@ This project investigates how incorporating energy awareness into a Reinforcemen
 ├── models/
 │   ├── baseline_model.zip      # Trained standard PPO baseline
 │   └── erl_model.zip           # Trained E-RL policy with Deadlock Mitigation Strategy (DMS)
-├── media/                      # Directory for evaluation videos and output figures
+├── media/                      # Directory containing the evaluation videos and output figures
 ├── README.md
 └── requirements.txt            # Python package dependencies
