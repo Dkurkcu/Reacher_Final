@@ -10,7 +10,7 @@ from stable_baselines3.common.vec_env import DummyVecEnv
 from gymnasium.wrappers import TimeLimit
 from stable_baselines3.common.vec_env import VecFrameStack
 
-MODEL_PATH = "black_model.zip" 
+MODEL_PATH = "black_model.zip"   
 XML_NAME = "reacher_v3.xml"
 N_STACK = 4 
 
