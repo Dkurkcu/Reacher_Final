@@ -1,0 +1,77 @@
+_wandb:
+    value:
+        cli_version: 0.22.1
+        e:
+            jpqbaibg92hy3aw6b90k50j3siea9ar4:
+                codePath: sweep.py
+                codePathLocal: sweep.py
+                cpu_count: 8
+                cpu_count_logical: 16
+                disk:
+                    /:
+                        total: "1023247642624"
+                        used: "268663156736"
+                email: krkcdeniz15@gmail.com
+                executable: c:\Users\90546\Desktop\reacher_latest\.reacher-venv\Scripts\python.exe
+                git:
+                    commit: c44480cfa4fcf1e2dd1f068b1595897cf9ded6bb
+                    remote: https://github.com/Dkurkcu/box_with_truncation_zones.git
+                host: DESKTOP-E3OIJ6K
+                memory:
+                    total: "14773178368"
+                os: Windows-11-10.0.26200-SP0
+                program: C:\Users\90546\Desktop\reacher_latest\sweep.py
+                python: CPython 3.13.3
+                root: C:\Users\90546\Desktop\reacher_latest
+                startedAt: "2026-05-30T14:11:15.555434Z"
+                writerId: jpqbaibg92hy3aw6b90k50j3siea9ar4
+        m:
+            - "1": global/step
+              "6":
+                - 3
+              "7": []
+            - "1": ep/step
+              "6":
+                - 2
+                - 3
+              "7": []
+            - "2": '*'
+              "5": 1
+              "6":
+                - 1
+              "7": []
+            - "2": ep/*
+              "5": 2
+              "6":
+                - 1
+              "7": []
+        python_version: 3.13.3
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 7
+                - 14
+                - 65
+                - 66
+            "4": 3.13.3
+            "5": 0.22.1
+            "8":
+                - 3
+            "12": 0.22.1
+            "13": windows-amd64
+batch_size:
+    value: 256
+clip_range:
+    value: 0.03
+ent_coef:
+    value: 0.005
+gamma:
+    value: 0.998
+learning_rate:
+    value: 0.0003
+seed:
+    value: 0

@@ -1,0 +1,1 @@
+{"metrics/episode_reward":-478.767604,"ep/steps_to_success":NaN,"metrics/episode_energy":2.2746376822745145,"ep/final_distance":0.8599645896625374,"ep/step":13877,"_timestamp":1.780153512648638e+09,"_step":27753,"metrics/success_rate":0.81,"metrics/episode_stall_energy_total":0,"_wandb":{"runtime":3236},"_runtime":3236,"global/step":4.005644e+06,"ep/success":0}
