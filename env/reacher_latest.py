@@ -191,7 +191,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
         # We NO LONGER use self.model.body_pos for the box! It lives in qpos now.
         qpos_full[2] = box_offset[0]  # Box X
         qpos_full[3] = box_offset[1]  # Box Y
-        qpos_full[4] = -5.05           # Box Z
+        qpos_full[4] = 0.05           # Box Z
 
         # 3. Set the Freejoint Box Rotation (Quaternion: Indices 5, 6, 7, 8)
         # W, X, Y, Z for a standard, flat rotation is 1, 0, 0, 0
@@ -278,7 +278,7 @@ class ReacherV3Env(MujocoEnv, EzPickle):
         # 5. STRICT STALL DETECTOR
         # Only safe if at target (dist < 0.05). Anywhere else = Danger.
         if self._steps_in_episode > 20 and dist > 0.1:
-            is_stalled = (avg_effort > 20 ) and (avg_motion < 0.00)#0.6 ve 0.02
+            is_stalled = (avg_effort > 0.6 ) and (avg_motion < 0.02)#0.6 ve 0.02
         else:
             is_stalled = False
 
